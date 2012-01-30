@@ -168,6 +168,6 @@ $(function() {
 
 	window.btappview = new window.BtappModelSidebarView({'model':new Btapp({'id':'btapp', 'url':'btapp/'})});
 	window.btappview.expanded = true;
-	$('#sidebar').append(window.btappview.render().el);
+	$('#data').append(window.btappview.render().el);
 	btappview.content.show();
 });

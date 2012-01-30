@@ -94,6 +94,9 @@ body {
 	padding-top: 2px;
 	padding-bottom: 2px;
 }
+#sidebar #data {
+	padding-bottom:50px;
+}
 .content p {
 	padding-left: 20px;
 }
