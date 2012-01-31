@@ -7,7 +7,6 @@ $(function() {
 			_.bindAll(this, 'render', 'show');
 			this.model.bind('change', this.render);
 			this.model.bind('destroy', this.remove);
-			
 			$(this.el).hide();
 		},
 		render: function() {
@@ -62,9 +61,9 @@ $(function() {
 		tagName: "div",
 		initialize: function() {
 			Backbone.View.prototype.initialize.apply(this, arguments);	
-			_.bindAll(this, 'render', 'add', 'remove');
-			this.model.bind('add', this.add);
-			this.model.bind('remove', this.remove);
+			_.bindAll(this, 'render', '_add', '_remove');
+			this.model.bind('add', this._add);
+			this.model.bind('remove', this._remove);
 			this.model.bind('change', this.render);
 			this.model.bind('destroy', this.remove);
 			this.expanded = false;
@@ -128,14 +127,14 @@ $(function() {
 		tagName: "div",
 		initialize: function() {
 			BtappSidebarView.prototype.initialize.apply(this, arguments);	
-			this.model.each(this.add);
+			this.model.each(this._add);
 		},
-		add: function(model) {
-			this._views[model.cid] = new BtappModelSidebarView({'model':model});
+		_add: function(model) {
+			this._views[model.url] = new BtappModelSidebarView({'model':model});
 		},
-		remove: function(model) {
-			this._views[model.cid].destructor();
-			delete this._views[model.cid];
+		_remove: function(model) {
+			this._views[model.url].destructor();
+			delete this._views[model.url];
 		}
 	});
 	window.BtappModelSidebarView = BtappSidebarView.extend({
@@ -143,10 +142,10 @@ $(function() {
 		initialize: function() {
 			BtappSidebarView.prototype.initialize.apply(this, arguments);	
 			_.each(this.model.attributes, _.bind(function(value, key) {
-				this.add(value);
+				this._add(value);
 			}, this));
 		},
-		add: function(attribute) {
+		_add: function(attribute) {
 			if(typeof attribute === 'object' && 'bt' in attribute) {
 				if('length' in attribute) {
 					this._views[attribute.url] = new BtappCollectionSidebarView({'model':attribute});
@@ -155,7 +154,7 @@ $(function() {
 				}
 			}
 		},
-		remove: function(attribute) {
+		_remove: function(attribute) {
 			if(typeof attribute === 'object' && 'bt' in attribute) {
 				for(var v in this._views) {
 					if(this._views[v].model.url == attribute.url) {
