@@ -1,4 +1,6 @@
 $(function() {
+	"use strict";
+	"use curly";
 	var content_visible = null;
 	window.BtappContentView = Backbone.View.extend({
 		tagName: "div",
@@ -11,7 +13,9 @@ $(function() {
 		},
 		render: function() {
 			$(this.el).empty();
-			if(!this.model.url) return this;
+			if(!this.model.url) {
+				return this;
+			}
 			this.render_url();
 			this.render_attributes();
 			this.render_functions();
@@ -26,10 +30,12 @@ $(function() {
 			var html = '';
 			//add the attributes
 			html += '<div class="variables"><h4>attributes:';
-			for(var a in this.model.attributes) {
-				var attribute = this.model.attributes[a];
-				if(!(typeof attribute === 'object') || !('bt' in attribute)) {
-					html += '<p><span>' + a + '</span>: ' + attribute + '</p>';
+			for(var key in this.model.attributes) {
+				if(this.model.attributes.hasOwnProperty(key)) {
+					var attribute = this.model.attributes[key];
+					if(!(typeof attribute === 'object' && 'bt' in attribute)) {
+						html += '<p><span>' + key + '</span>: ' + attribute + '</p>';
+					}
 				}
 			}
 			html += '</h4></div>';
@@ -38,11 +44,13 @@ $(function() {
 		render_functions: function() {
 			var html = '';
 			html += '<div class="functions"><h4>functions:';
-			for(var b in this.model.bt) {
-				var signatures = this.model.bt[b].valueOf().split('(');
-				html += '<p>' + b + ':</p>';
-				for(var i = 1; i < signatures.length; i++) {
-					html += '<p><span>function</span>(' + signatures[i] + '</p>';
+			for(var key in this.model.bt) {
+				if(this.model.bt.hasOwnProperty(key)) {
+					var signatures = this.model.bt[key].valueOf().split('(');
+					html += '<p>' + key + ':</p>';
+					for(var i = 1; i < signatures.length; i++) {
+						html += '<p><span>function</span>(' + signatures[i] + '</p>';
+					}
 				}
 			}
 			html += '</h4></div>';
@@ -86,7 +94,9 @@ $(function() {
 			}
 			$(this.el).append(toggle);
 			toggle.click(_.bind(function(toggle) {
-				if(!toggle.hasClass('right') && !toggle.hasClass('down')) return;
+				if(!toggle.hasClass('right') && !toggle.hasClass('down')) {
+					return;
+				}
 
 				$(this.el).children('.children').toggle();
 				if(toggle.hasClass('right')) {
@@ -103,8 +113,10 @@ $(function() {
 			if(_.keys(this._views).length > 0) {
 				var children = $('<div></div>');
 				children.addClass('children');
-				for(var v in this._views) {
-					children.append($(this._views[v].render().el));
+				for(var key in this._views) {
+					if(this._views.hasOwnProperty(key)) {
+						children.append($(this._views[key].render().el));
+					}
 				}
 				if(!this.expanded) {
 					children.hide();
@@ -114,7 +126,9 @@ $(function() {
 		},
 		render: function() {
 			$(this.el).empty();
-			if(!this.model.url) return this;
+			if(!this.model.url) {
+				return this;
+			}
 
 			this.render_toggle();
 			this.render_label();
@@ -157,7 +171,7 @@ $(function() {
 		_remove: function(attribute) {
 			if(typeof attribute === 'object' && 'bt' in attribute) {
 				for(var v in this._views) {
-					if(this._views[v].model.url == attribute.url) {
+					if(this._views[v].model.url === attribute.url) {
 						this._views[v].model.trigger('destroy');
 					}
 				}
@@ -169,4 +183,24 @@ $(function() {
 	window.btappview.expanded = true;
 	$('#data').append(window.btappview.render().el);
 	btappview.content.show();
+	
+	$('#adddemocontent').click(function() {
+		if(window.btappview.model.get('add')) {
+			var rss_feed_url = 'http://www.clearbits.net/feeds/creator/191-megan-lisa-jones.rss';
+			var torrent_url = 'http://www.clearbits.net/get/1684-captive---bittorrent-edition.torrent';
+			window.btappview.model.get('add').bt.rss_feed(function() {}, rss_feed_url);
+			window.btappview.model.get('add').bt.torrent(function() {}, torrent_url, 'demo_torrents');
+		} else {
+			alert('not connected to a torrent client...sad times');
+		}
+	});
+	$('#removedemocontent').click(function() {
+		var torrents = window.btappview.model.get('torrent');
+		if(torrents) {
+			var torrent = window.btappview.model.get('torrent').get('btapp/torrent/all/C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A/');
+			if(torrent) {
+				torrent.bt.remove(function() {});
+			}
+		}
+	});
 });
