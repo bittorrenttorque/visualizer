@@ -147,7 +147,7 @@ $(function() {
 			this._views[model.url] = new BtappModelSidebarView({'model':model});
 		},
 		_remove: function(model) {
-			this._views[model.url].destructor();
+			this._views[model.url].remove();
 			delete this._views[model.url];
 		}
 	});
