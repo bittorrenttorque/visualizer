@@ -179,7 +179,9 @@ $(function() {
 		}
 	});
 
-	window.btappview = new window.BtappModelSidebarView({'model':new Btapp({'id':'btapp', 'url':'btapp/'})});
+	var btapp = new Btapp;
+	btapp.connect();
+	window.btappview = new window.BtappModelSidebarView({'model':btapp});
 	window.btappview.expanded = true;
 	$('#data').append(window.btappview.render().el);
 	btappview.content.show();
