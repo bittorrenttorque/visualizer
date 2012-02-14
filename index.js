@@ -6,7 +6,7 @@ $(function() {
 		tagName: "div",
 		className: "content",
 		initialize: function() {
-			_.bindAll(this, 'render', 'show');
+			_.bindAll(this, 'render', 'show', 'exec_func');
 			this.model.bind('change', this.render);
 			this.model.bind('destroy', this.remove);
 			$(this.el).hide();
@@ -49,12 +49,44 @@ $(function() {
 					var signatures = this.model.bt[key].valueOf().split('(');
 					html += '<p>' + key + ':</p>';
 					for(var i = 1; i < signatures.length; i++) {
-						html += '<p><span>function</span>(' + signatures[i] + '</p>';
+						html += '<p><span func="' + key + '" sig="' + 
+							signatures[i].slice(0,-1) + '">function</span>(' + 
+							signatures[i] + '</p>';
 					}
 				}
 			}
 			html += '</h4></div>';
 			$(this.el).append(html);
+			var _this = this;
+			this.$('span[func]').bind('click', function(e) {
+				_this.exec_func(this, e);
+			});
+		},
+		exec_func: function(elem, e) {
+			var funcName = $(elem).attr('func'),
+				sig = $(elem).attr('sig'),
+				arg_names = sig.split(','),
+				args = [function(){
+					//callback function
+					if(window.console && console.log)
+						console.log('RESULT!', this, arguments);
+				}];
+
+			_.each(arg_names, function(v) {
+				if(v.length) {
+					var val = prompt('Enter a ' + v);
+					if(v == 'boolean')
+						val = val === 'true' || val === '1'
+					if(v == 'number')
+						val = parseFloat(val);
+					if(v == 'function' || v == 'dispatch')
+						eval('val = ' + val);
+					
+					args.push(val);
+				}
+			});
+
+			this.model.bt[funcName].apply(this, args);
 		},
 		show: function() {
 			if(content_visible) {
