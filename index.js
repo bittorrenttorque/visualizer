@@ -7,7 +7,7 @@ $(function() {
 		className: "content",
 		initialize: function() {
 			_.bindAll(this, 'render', 'show');
-			this.model.bind('change', this.render);
+			this.model.bind('add remove change', this.render);
 			this.model.bind('destroy', this.remove);
 			$(this.el).hide();
 		},
@@ -72,7 +72,7 @@ $(function() {
 			_.bindAll(this, 'render', '_add', '_remove');
 			this.model.bind('add', this._add);
 			this.model.bind('remove', this._remove);
-			this.model.bind('change', this.render);
+			this.model.bind('add remove change', this.render);
 			this.model.bind('destroy', this.remove);
 			this.expanded = false;
 			this._views = {};
