@@ -6,7 +6,7 @@ $(function() {
 		tagName: "div",
 		className: "content",
 		initialize: function() {
-			_.bindAll(this, 'render', 'show');
+			_.bindAll(this, 'render', 'show', 'remove');
 			this.model.bind('add remove change', this.render);
 			this.model.bind('destroy', this.remove);
 			$(this.el).hide();
@@ -49,7 +49,7 @@ $(function() {
 					var signatures = this.model.bt[key].valueOf().split('(');
 					html += '<p>' + key + ':</p>';
 					for(var i = 1; i < signatures.length; i++) {
-						html += '<p><span>function</span>(' + signatures[i] + '</p>';
+						html += '<p><span>function</span>(callback' + ((signatures[i] !== ')') ? (',' + signatures[i]) : ')') + '</p>';
 					}
 				}
 			}
@@ -69,7 +69,7 @@ $(function() {
 		tagName: "div",
 		initialize: function() {
 			Backbone.View.prototype.initialize.apply(this, arguments);	
-			_.bindAll(this, 'render', '_add', '_remove');
+			_.bindAll(this, 'render', '_add', '_remove', 'remove');
 			this.model.bind('add', this._add);
 			this.model.bind('remove', this._remove);
 			this.model.bind('add remove change', this.render);
