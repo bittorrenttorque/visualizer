@@ -1,3 +1,7 @@
+<link rel="icon" href="docs/images/favicon.ico">
+
+<img id="logo" src="http://www.pwmckenna.com/img/bittorrent_medium.png" />
+
 #btapp_api_viewer
 This api viewer is itself a web app using backbone.btapp.js... That library provides access to the state/functionality of uTorrent/BitTorrent clients either on the local machine or remotely. This viewer simply sits on top of the backbone library and displays the objects, with their attributes and functions that exist in the torrent client. 
 
