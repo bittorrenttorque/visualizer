@@ -1,8 +1,6 @@
 $(function() {
-	"use strict";
-	"use curly";
 	var content_visible = null;
-	window.BtappContentView = Backbone.View.extend({
+	BtappContentView = Backbone.View.extend({
 		tagName: "div",
 		className: "content",
 		initialize: function() {
@@ -65,7 +63,7 @@ $(function() {
 		}
 	});
 
-	window.BtappSidebarView = Backbone.View.extend({
+	BtappSidebarView = Backbone.View.extend({
 		tagName: "div",
 		initialize: function() {
 			Backbone.View.prototype.initialize.apply(this, arguments);	
@@ -137,7 +135,7 @@ $(function() {
 		}
 	});
 	
-	window.BtappCollectionSidebarView = BtappSidebarView.extend({
+	BtappCollectionSidebarView = BtappSidebarView.extend({
 		tagName: "div",
 		initialize: function() {
 			BtappSidebarView.prototype.initialize.apply(this, arguments);	
@@ -151,7 +149,7 @@ $(function() {
 			delete this._views[model.url];
 		}
 	});
-	window.BtappModelSidebarView = BtappSidebarView.extend({
+	BtappModelSidebarView = BtappSidebarView.extend({
 		tagName: "div",
 		initialize: function() {
 			BtappSidebarView.prototype.initialize.apply(this, arguments);	
@@ -179,30 +177,35 @@ $(function() {
 		}
 	});
 
-	var btapp = new Btapp;
-	btapp.connect();
-	window.btappview = new window.BtappModelSidebarView({'model':btapp});
-	window.btappview.expanded = true;
-	$('#data').append(window.btappview.render().el);
-	btappview.content.show();
-	
-	$('#adddemocontent').click(function() {
-		if(window.btappview.model.get('add')) {
-			var rss_feed_url = 'http://www.clearbits.net/feeds/creator/191-megan-lisa-jones.rss';
-			var torrent_url = 'http://www.clearbits.net/get/1684-captive---bittorrent-edition.torrent';
-			window.btappview.model.get('add').bt.rss_feed(function() {}, rss_feed_url);
-			window.btappview.model.get('add').bt.torrent(function() {}, torrent_url, 'demo_torrents');
-		} else {
-			alert('not connected to a torrent client...sad times');
-		}
-	});
-	$('#removedemocontent').click(function() {
-		var torrents = window.btappview.model.get('torrent');
-		if(torrents) {
-			var torrent = window.btappview.model.get('torrent').get('btapp/torrent/all/C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A/');
-			if(torrent) {
-				torrent.bt.remove(function() {});
+	function add_view(product) {
+		var btapp = new Btapp({id: product});
+		btapp.connect({product: product});
+		btappview = new BtappModelSidebarView({'model':btapp});
+		btappview.expanded = true;
+		$('#data').append(btappview.render().el);
+		btappview.content.show();
+		
+		$('#adddemocontent').click(function() {
+			if(btappview.model.get('add')) {
+				var rss_feed_url = 'http://www.clearbits.net/feeds/creator/191-megan-lisa-jones.rss';
+				var torrent_url = 'http://www.clearbits.net/get/1684-captive---bittorrent-edition.torrent';
+				btappview.model.get('add').bt.rss_feed(function() {}, rss_feed_url);
+				btappview.model.get('add').bt.torrent(function() {}, torrent_url, 'demo_torrents');
+			} else {
+				alert('not connected to a torrent client...sad times');
 			}
-		}
-	});
+		});
+		$('#removedemocontent').click(function() {
+			var torrents = btappview.model.get('torrent');
+			if(torrents) {
+				var torrent = btappview.model.get('torrent').get('btapp/torrent/all/C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A/');
+				if(torrent) {
+					torrent.bt.remove(function() {});
+				}
+			}
+		});
+	}
+
+	add_view('Torque');
+	add_view('SoShare');
 });
