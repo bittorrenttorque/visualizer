@@ -206,6 +206,5 @@ $(function() {
 		});
 	}
 
-	add_view('Torque');
 	add_view('SoShare');
 });
