@@ -71,8 +71,7 @@ $(function() {
 			this.model.bind('add', this._add);
 			this.model.bind('remove', this._remove);
 			this.model.bind('add remove change', this.render);
-			this.model.bind('destroy', this.remove);
-			this.expanded = false;
+			this.expanded = true;
 			this._views = {};
 
 			this.content = new BtappContentView({'model':this.model});
@@ -171,23 +170,37 @@ $(function() {
 				for(var v in this._views) {
 					if(this._views[v].model.url === attribute.url) {
 						this._views[v].model.trigger('destroy');
+						delete this._views[v];
 					}
 				}
 			}
 		}
 	});
 
-	$('#productname').val('SoShare');
-
 	var btapp = new Btapp;
-	btapp.connect({product: $('#productname').val()});
-
-	$('#productconnect').click(function() {
-		btapp.disconnect();
-		setTimeout(function() {
-			btapp.connect({product: $('#productname').val()});
-		}, 1000);
+	_(Btapp.QUERIES).each(function(query, label) {
+		var input = $('<option>' + label + '</option>');
+		$('#queries').append(input);
 	});
+
+	$('#queries').change(function(val) {
+		var querykey = $('#queries option:selected').val();
+		btapp.disconnect();
+		var product = $('#productname option:selected').val();
+		btapp.connect({product: product, queries: [ Btapp.QUERIES[querykey] ]});
+	});
+
+	$('#productname').append('<option>SoShare</option>');
+	$('#productname').append('<option>Torque</option>');
+
+	$('#productname').change(function(val) {
+		var querykey = $('#queries option:selected').val();
+		btapp.disconnect();
+		var product = $('#productname option:selected').val();
+		btapp.connect({product: product, queries: [ Btapp.QUERIES[querykey] ]});
+	});
+
+	btapp.connect({product: $('#productname option:selected').val(), queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]});
 
 	btappview = new BtappModelSidebarView({'model':btapp});
 	btappview.expanded = true;
