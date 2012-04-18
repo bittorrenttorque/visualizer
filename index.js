@@ -43,7 +43,7 @@ $(function() {
 			var html = '';
 			html += '<div class="functions"><h4>functions:';
 			for(var key in this.model.bt) {
-				if(this.model.bt.hasOwnProperty(key)) {
+				if(this.model.hasOwnProperty(key)) {
 					var signatures = this.model.bt[key].valueOf().split('(');
 					html += '<p>' + key + ':</p>';
 					for(var i = 1; i < signatures.length; i++) {
@@ -184,10 +184,11 @@ $(function() {
 	});
 
 	$('#queries').change(function(val) {
-		var querykey = $('#queries option:selected').val();
 		btapp.disconnect();
-		var product = $('#productname option:selected').val();
-		btapp.connect({product: product, queries: [ Btapp.QUERIES[querykey] ]});
+		btapp.connect({
+			product: $('#productname option:selected').val(), 
+			queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
+		});
 	});
 
 	$('#productname').append('<option>SoShare</option>');
@@ -200,7 +201,10 @@ $(function() {
 		btapp.connect({product: product, queries: [ Btapp.QUERIES[querykey] ]});
 	});
 
-	btapp.connect({product: $('#productname option:selected').val(), queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]});
+	btapp.connect({
+		product: $('#productname option:selected').val(), 
+		queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
+	});
 
 	btappview = new BtappModelSidebarView({'model':btapp});
 	btappview.expanded = true;
@@ -211,8 +215,8 @@ $(function() {
 		if(btappview.model.get('add')) {
 			var rss_feed_url = 'http://www.clearbits.net/feeds/creator/191-megan-lisa-jones.rss';
 			var torrent_url = 'http://www.clearbits.net/get/1684-captive---bittorrent-edition.torrent';
-			btappview.model.get('add').bt.rss_feed(function() {}, rss_feed_url);
-			btappview.model.get('add').bt.torrent(function() {}, torrent_url, 'demo_torrents');
+			btappview.model.get('add').rss_feed(function() {}, rss_feed_url);
+			btappview.model.get('add').torrent(function() {}, torrent_url, 'demo_torrents');
 		} else {
 			alert('not connected to a torrent client...sad times');
 		}
@@ -222,8 +226,27 @@ $(function() {
 		if(torrents) {
 			var torrent = btappview.model.get('torrent').get('btapp/torrent/all/C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A/');
 			if(torrent) {
-				torrent.bt.remove(function() {});
+				torrent.remove(function() {});
 			}
 		}
+	});
+	$('#connectremote').click(function() {
+		alert('functionality coming soon');
+		return;
+/**
+		var name = prompt("Please enter a username");
+		var password = prompt("Please enter a password");
+		btapp.connect_remote(function() {
+			setTimeout(function() {
+				btapp.disconnect();
+				btapp.connect({
+					username: name,
+					password: password,
+					product: $('#productname option:selected').val(),
+					queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
+				});			
+			}, 5000);
+		}, name, password);
+**/
 	});
 });
