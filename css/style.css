@@ -3,7 +3,7 @@ html {
 }
 select {
 	width: 25%;
-	padding-right: 10px;
+	margin-right: 10px;
 }
 body {
 	font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;

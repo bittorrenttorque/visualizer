@@ -1,19 +1,6 @@
-<link rel="icon" href="docs/images/favicon.ico">
+#Btapp Api Viewer
+This is a real time data viewer built on top of the [btapp.js](http://pwmckenna.github.com/btapp) library. While it's an example of a rather simple app built using the library, it is mostly useful as a development tool. If you're curious what functions/state is available, this is the easiest way to poke around.
 
-<img id="logo" src="http://www.pwmckenna.com/img/bittorrent_medium.png" />
-
-#btapp_api_viewer
-This api viewer is itself a web app using backbone.btapp.js... That library provides access to the state/functionality of uTorrent/BitTorrent clients either on the local machine or remotely. This viewer simply sits on top of the backbone library and displays the objects, with their attributes and functions that exist in the torrent client. 
-
-As most apps that use backbone.btapp.js will simply use a subset of the data/functionality of the library, this should allow you to browse the possibilities.
-
-As some of the data revealed is similar to the data that [docco](http://jashkenas.github.com/docco/ "docco") provides, and we use docco to provide annotated source code for all the btapp libraries and examples, the design of this app largely mirrors docco output. Thanks to Jeremy Ashkenas!
-
-__Dependencies:__  
-[backbone.btapp.js](http://pwmckenna.github.com/btapp "btapp")  
-[plugin.btapp.js](http://pwmckenna.github.com/plugin "plugin")  
-  
-  
 #Authors
 
 Patrick Williams  
