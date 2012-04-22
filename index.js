@@ -232,15 +232,16 @@ $(function() {
 		var name = prompt("Please enter a username");
 		var password = prompt("Please enter a password");
 		btapp.bind('remoteStatus', function(status) {
-			debugger;
-			return;
-			btapp.disconnect();
-			btapp.connect({
-				username: name,
-				password: password,
-				product: $('#productname option:selected').val(),
-				queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
-			});			
+			if(status.status === "Status: Accessible") {
+				alert('Client connected to falcon...connecting our btapp object through falcon instead of via localhost');
+				btapp.disconnect();
+				btapp.connect({
+					username: name,
+					password: password,
+					product: $('#productname option:selected').val(),
+					queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
+				});
+			}
 		}, this);
 		btapp.connect_remote(
 			name, 
