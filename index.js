@@ -215,8 +215,8 @@ $(function() {
 		if(btappview.model.get('add')) {
 			var rss_feed_url = 'http://www.clearbits.net/feeds/creator/191-megan-lisa-jones.rss';
 			var torrent_url = 'http://www.clearbits.net/get/1684-captive---bittorrent-edition.torrent';
-			btappview.model.get('add').rss_feed(function() {}, rss_feed_url);
-			btappview.model.get('add').torrent(function() {}, torrent_url, 'demo_torrents');
+			btappview.model.get('add').rss_feed(rss_feed_url);
+			btappview.model.get('add').torrent(torrent_url, 'demo_torrents');
 		} else {
 			alert('not connected to a torrent client...sad times');
 		}
@@ -225,9 +225,7 @@ $(function() {
 		var torrents = btappview.model.get('torrent');
 		if(torrents) {
 			var torrent = btappview.model.get('torrent').get('btapp/torrent/all/C106173C44ACE99F57FCB83561AEFD6EAE8A6F7A/');
-			if(torrent) {
-				torrent.remove(function() {});
-			}
+			torrent && torrent.remove();
 		}
 	});
 	$('#connectremote').click(function() {
