@@ -229,22 +229,23 @@ $(function() {
 		}
 	});
 	$('#connectremote').click(function() {
-		alert('functionality coming soon');
-		return;
-/**
 		var name = prompt("Please enter a username");
 		var password = prompt("Please enter a password");
-		btapp.connect_remote(function() {
-			setTimeout(function() {
-				btapp.disconnect();
-				btapp.connect({
-					username: name,
-					password: password,
-					product: $('#productname option:selected').val(),
-					queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
-				});			
-			}, 5000);
-		}, name, password);
-**/
+		btapp.connect_remote(
+			function() {
+				setTimeout(function() {
+					return;
+					btapp.disconnect();
+					btapp.connect({
+						username: name,
+						password: password,
+						product: $('#productname option:selected').val(),
+						queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
+					});			
+				}, 5000);
+			}, 
+			name, 
+			password
+		);
 	});
 });
