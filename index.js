@@ -47,7 +47,7 @@ $(function() {
 					var signatures = this.model.bt[key].valueOf().split('(');
 					html += '<p>' + key + ':</p>';
 					for(var i = 1; i < signatures.length; i++) {
-						html += '<p><span>function</span>(callback' + ((signatures[i] !== ')') ? (',' + signatures[i]) : ')') + '</p>';
+						html += '<p><span>function</span>(' + ((signatures[i] !== ')') ? signatures[i] : ')') + '</p>';
 					}
 				}
 			}
