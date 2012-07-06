@@ -191,7 +191,6 @@ $(function() {
 		});
 	});
 
-	$('#productname').append('<option>SoShare</option>');
 	$('#productname').append('<option>Torque</option>');
 
 	$('#productname').change(function(val) {
