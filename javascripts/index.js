@@ -31,7 +31,7 @@ $(function() {
 			for(var key in this.model.attributes) {
 				if(this.model.attributes.hasOwnProperty(key)) {
 					var attribute = this.model.attributes[key];
-					if(!(typeof attribute === 'object' && 'bt' in attribute)) {
+					if(!(typeof attribute === 'object' && attribute !== null && 'bt' in attribute)) {
 						html += '<p><span>' + key + '</span>: ' + attribute + '</p>';
 					}
 				}
@@ -157,7 +157,7 @@ $(function() {
 			}, this));
 		},
 		_add: function(attribute) {
-			if(typeof attribute === 'object' && 'bt' in attribute) {
+			if(typeof attribute === 'object' && attribute !== null && 'bt' in attribute) {
 				if('length' in attribute) {
 					this._views[attribute.url] = new BtappCollectionSidebarView({'model':attribute});
 				} else {
@@ -166,7 +166,7 @@ $(function() {
 			}
 		},
 		_remove: function(attribute) {
-			if(typeof attribute === 'object' && 'bt' in attribute) {
+			if(typeof attribute === 'object' && attribute !== null && 'bt' in attribute) {
 				for(var v in this._views) {
 					if(this._views[v].model.url === attribute.url) {
 						this._views[v].model.trigger('destroy');
