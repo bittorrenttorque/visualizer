@@ -192,12 +192,18 @@ $(function() {
 	});
 
 	$('#productname').append('<option>Torque</option>');
+	$('#productname').append('<option>uTorrent</option>');
 
 	$('#productname').change(function(val) {
 		var querykey = $('#queries option:selected').val();
 		btapp.disconnect();
 		var product = $('#productname option:selected').val();
-		btapp.connect({product: product, queries: [ Btapp.QUERIES[querykey] ]});
+		btapp.connect({
+			product: product, 
+			queries: [ Btapp.QUERIES[querykey] ],
+			plugin: product == 'Torque',
+			pairing_type: product == 'Torque' ? 'iframe' : 'native'
+		});
 	});
 
 	btapp.connect({
