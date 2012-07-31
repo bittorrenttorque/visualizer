@@ -19,9 +19,6 @@ body {
 	padding-top: 10px;
 	padding-bottom: 25px;
 }
-#introduction img {
-
-}
 #introduction h1 {
 	margin: 34px 0px 15px 0px;
 	padding-bottom: 10px;
@@ -64,10 +61,10 @@ body {
 	cursor: pointer;
 }
 #sidebar .right {
-	background-image: url('../img/right.png') !important;
+	background-image: url('../images/right.png') !important;
 }
 #sidebar .down {
-	background-image: url('../img/down.png') !important;
+	background-image: url('../images/down.png') !important;
 }
 #content {
 	position:absolute;
@@ -79,7 +76,7 @@ body {
 	border-left: 1px solid #e5e5ee;
 	padding-left: 25px;
 }
-#content div {
+#content > .content > div {
 	padding: 10px 0px 25px 0px;
 }
 #sidebar, #content {
@@ -113,4 +110,12 @@ body {
 	color: #219161;
 }
 
+.content .variables > p {
+	position: relative;
+}
 
+.content .variables > p > .popover {
+	position: absolute;
+	top: 0px !important;
+	left: 50px !important;
+}

@@ -25,23 +25,69 @@ $(function() {
 			$(this.el).append(html);
 		},
 		render_attributes: function() {
-			var html = '';
-			//add the attributes
-			html += '<div class="variables"><h4>attributes:';
-			for(var key in this.model.attributes) {
+			var variables = $('<div></div>');
+			variables.addClass('variables');
+			var header = $('<h4>attributes:</h4>');
+			variables.append(header);
+			_(this.model.attributes).each(function(attribute, key) {
 				if(this.model.attributes.hasOwnProperty(key)) {
-					var attribute = this.model.attributes[key];
 					if(!(typeof attribute === 'object' && attribute !== null && 'bt' in attribute)) {
-						html += '<p><span>' + key + '</span>: ' + attribute + '</p>';
+						var variable = $('<p><span>' + key + '</span>: ' + attribute + '</p>');
+						variable.popover({
+							animation: true,
+							placement: 'in bottom',
+							trigger: 'hover',
+							title: 'Set "' + key + '"',
+							content: '<form class="well form-inline"><input type="text" class="input-small" placeholder="' + attribute + '">  <button type="submit" class="btn">Set</button></form>'
+						});
+						var notify = function(type, text) {
+							var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
+							a.alert();
+							variable.after(a);
+							setTimeout(_.bind(a.alert, a, 'close'), 2000);
+
+							variable.popover('hide');
+						}
+						variables.append(variable);
+						variable.on('submit', _.bind(function(e) {
+							e.preventDefault();
+							if(variable.find('button').hasClass('disabled')) return;
+
+							variable.find('button').addClass('disabled');
+							try {
+								var val = variable.find('.input-small').val();
+								var v = eval(val);
+								this.model.bt.set(key, v).then(_.bind(function(data) {
+									console.log(JSON.stringify(data));
+									var path = this.model.url.split('/');
+									for(var i = 0; i < path.length - 1; i++) {
+										var link = path[i];
+										if(!(link in data)) {
+											notify('error', 'return value malformed');
+											return;
+										}
+										data = data[link];
+									}
+									if(data.set === 'Empty') {
+										notify('success', 'success setting ' + key + ' to ' + val);
+									} else {
+										notify('default', data.set);
+									}
+								}, this)).fail(function() {
+									notify('error', 'failed to set ' + key + ' for unknown reason.');
+								});
+							} catch(e) {
+								notify('error', 'failed to evaluate ' + val);
+							}
+						}, this));
 					}
 				}
-			}
-			html += '</h4></div>';
-			$(this.el).append(html);
+			}, this);
+			$(this.el).append(variables);
 		},
 		render_functions: function() {
 			var html = '';
-			html += '<div class="functions"><h4>functions:';
+			html += '<div class="functions"><h4>functions:</h4>';
 			for(var key in this.model.bt) {
 				if(this.model.hasOwnProperty(key)) {
 					var signatures = this.model.bt[key].valueOf().split('(');
@@ -51,7 +97,7 @@ $(function() {
 					}
 				}
 			}
-			html += '</h4></div>';
+			html += '</div>';
 			$(this.el).append(html);
 		},
 		show: function() {
