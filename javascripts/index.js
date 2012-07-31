@@ -69,8 +69,8 @@ $(function() {
 										}
 										data = data[link];
 									}
-									if(data.set === 'Empty') {
-										notify('success', 'success setting ' + key + ' to ' + val);
+									if('set' in data && data.set === 'success') {
+										notify('success', data.set);
 									} else {
 										notify('default', data.set);
 									}
@@ -123,12 +123,8 @@ $(function() {
 
 							signature.find('button').addClass('disabled');
 							try {
-								this.model.bt[key]().then(_.bind(function(data) {									
-									if(data[key] === 'Empty') {
-										notify('success', 'success calling ' + key);
-										return;
-									}
-
+								this.model.bt[key]().then(_.bind(function(data) {
+									console.log(JSON.stringify(data));
 									var path = this.model.url.split('/');
 									for(var i = 0; i < path.length - 1; i++) {
 										var link = decodeURIComponent(path[i]);
@@ -137,12 +133,12 @@ $(function() {
 											return;
 										}
 										data = data[link];
-										if(data[key] === 'Empty') {
-											notify('success', 'success calling ' + key);
-											return;
-										}
 									}
-									notify('default', data.set);
+									if(key in data) {
+										notify('success', JSON.stringify(data[key]));
+									} else {
+										notify('default', data.set);
+									}
 								}, this)).fail(function() {
 									notify('error', 'failed to call ' + symbol + ' for unknown reason.');
 								});
