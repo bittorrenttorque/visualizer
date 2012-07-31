@@ -33,6 +33,8 @@ $(function() {
 				if(this.model.attributes.hasOwnProperty(key)) {
 					if(!(typeof attribute === 'object' && attribute !== null && 'bt' in attribute)) {
 						var variable = $('<p><span>' + key + '</span>: ' + attribute + '</p>');
+						variables.append(variable);
+
 						variable.popover({
 							animation: true,
 							placement: 'in bottom',
@@ -48,7 +50,6 @@ $(function() {
 
 							variable.popover('hide');
 						}
-						variables.append(variable);
 						variable.on('submit', _.bind(function(e) {
 							e.preventDefault();
 							if(variable.find('button').hasClass('disabled')) return;
@@ -61,9 +62,9 @@ $(function() {
 									console.log(JSON.stringify(data));
 									var path = this.model.url.split('/');
 									for(var i = 0; i < path.length - 1; i++) {
-										var link = path[i];
+										var link = decodeURIComponent(path[i]);
 										if(!(link in data)) {
-											notify('error', 'return value malformed');
+											notify('error', 'return value malformed: ' + JSON.stringify(data));
 											return;
 										}
 										data = data[link];
@@ -86,19 +87,73 @@ $(function() {
 			$(this.el).append(variables);
 		},
 		render_functions: function() {
-			var html = '';
-			html += '<div class="functions"><h4>functions:</h4>';
-			for(var key in this.model.bt) {
+			var functions = $('<div></div>');
+			functions.addClass('functions');
+			functions.css('position', 'relative');
+			var header = $('<h4>functions:</h4>');
+			functions.append(header);
+
+			_.each(this.model.bt, function(z, key) {
 				if(this.model.hasOwnProperty(key)) {
 					var signatures = this.model.bt[key].valueOf().split('(');
-					html += '<p>' + key + ':</p>';
+					var symbol = $('<p>' + key + ':</p>');
+					functions.append(symbol);
+
 					for(var i = 1; i < signatures.length; i++) {
-						html += '<p><span>function</span>(' + ((signatures[i] !== ')') ? signatures[i] : ')') + '</p>';
+						var signature = $('<p><span>function</span>(' + ((signatures[i] !== ')') ? signatures[i] : ')') + '</p>');
+						functions.append(signature);
+						signature.popover({
+							animation: true,
+							placement: 'in bottom',
+							trigger: 'hover',
+							title: 'Call ' + key,
+							content: '<button type="submit" class="btn">Call Function</button>'
+						});
+						var notify = function(type, text) {
+							var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
+							a.alert();
+							signature.after(a);
+							setTimeout(_.bind(a.alert, a, 'close'), 2000);
+
+							signature.popover('hide');
+						}
+						signature.on('click', _.bind(function(e) {
+							e.preventDefault();
+							if(signature.find('button').hasClass('disabled')) return;
+
+							signature.find('button').addClass('disabled');
+							try {
+								this.model.bt[key]().then(_.bind(function(data) {									
+									if(data[key] === 'Empty') {
+										notify('success', 'success calling ' + key);
+										return;
+									}
+
+									var path = this.model.url.split('/');
+									for(var i = 0; i < path.length - 1; i++) {
+										var link = decodeURIComponent(path[i]);
+										if(!(link in data)) {
+											notify('error', 'return value malformed: ' + JSON.stringify(data));
+											return;
+										}
+										data = data[link];
+										if(data[key] === 'Empty') {
+											notify('success', 'success calling ' + key);
+											return;
+										}
+									}
+									notify('default', data.set);
+								}, this)).fail(function() {
+									notify('error', 'failed to call ' + symbol + ' for unknown reason.');
+								});
+							} catch(e) {
+								notify('error', JSON.stringify(e));
+							}
+						}, this));					
 					}
 				}
-			}
-			html += '</div>';
-			$(this.el).append(html);
+			}, this);
+			$(this.el).append(functions);
 		},
 		show: function() {
 			if(content_visible) {

@@ -110,11 +110,11 @@ body {
 	color: #219161;
 }
 
-.content .variables > p {
+.content .variables > p, .content .functions > p {
 	position: relative;
 }
 
-.content .variables > p > .popover {
+.popover {
 	position: absolute;
 	top: 0px !important;
 	left: 50px !important;
