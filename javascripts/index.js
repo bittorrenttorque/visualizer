@@ -35,12 +35,17 @@ $(function() {
 						var variable = $('<p><span>' + key + '</span>: ' + attribute + '</p>');
 						variables.append(variable);
 
+						var content = '<form class="well form-inline">' + 
+								'<input type="text" class="input-large" placeholder="' + attribute + '">' + 
+								'<button type="submit" class="btn">' + 'Set' + '</button>' +
+								'</form>';
+
 						variable.popover({
 							animation: true,
 							placement: 'in bottom',
 							trigger: 'hover',
 							title: 'Set "' + key + '"',
-							content: '<form class="well form-inline"><input type="text" class="input-small" placeholder="' + attribute + '">  <button type="submit" class="btn">Set</button></form>'
+							content: content
 						});
 						var notify = function(type, text) {
 							var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
@@ -56,7 +61,7 @@ $(function() {
 
 							variable.find('button').addClass('disabled');
 							try {
-								var val = variable.find('.input-small').val();
+								var val = variable.find('.input-large').val();
 								var v = eval(val);
 								this.model.bt.set(key, v).then(_.bind(function(data) {
 									console.log(JSON.stringify(data));
@@ -102,12 +107,23 @@ $(function() {
 					for(var i = 1; i < signatures.length; i++) {
 						var signature = $('<p><span>function</span>(' + ((signatures[i] !== ')') ? signatures[i] : ')') + '</p>');
 						functions.append(signature);
+						var content = '<button type="submit" class="btn">Call Function</button>';
+						var argsraw = signatures[i].substring(0, signatures[i].length - 1);
+						var args = argsraw.length > 0 ? argsraw.split(',') : [];
+						
+						var content = '<form class="well form-inline">';
+						for(var j = 0; j < args.length; j++) {
+							content += '<input type="text" class="input-large" placeholder="' + args[j] + '"><br>';
+						}
+						content += '<button type="submit" class="btn">Call Function</button>';
+						content += '</form>';
+						
 						signature.popover({
 							animation: true,
 							placement: 'in bottom',
 							trigger: 'hover',
 							title: 'Call ' + key,
-							content: '<button type="submit" class="btn">Call Function</button>'
+							content: content
 						});
 						var notify = function(type, text) {
 							var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
@@ -117,7 +133,7 @@ $(function() {
 
 							signature.popover('hide');
 						}
-						signature.on('click', _.bind(function(e) {
+						signature.on('submit', _.bind(function(e) {
 							e.preventDefault();
 							if(signature.find('button').hasClass('disabled')) return;
 

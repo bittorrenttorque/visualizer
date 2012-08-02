@@ -119,3 +119,14 @@ body {
 	top: 0px !important;
 	left: 50px !important;
 }
+
+input.input-large {
+	height: 25px;
+	margin: 2px;
+}
+.popover-inner {
+	width: auto !important;
+}
+.popover-content {
+	text-align: center;
+}
