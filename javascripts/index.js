@@ -11,17 +11,17 @@ $(function() {
 		},
 		render: function() {
 			$(this.el).empty();
-			if(!this.model.url) {
+			if(!this.model.path) {
 				return this;
 			}
-			this.render_url();
+			this.render_path();
 			this.render_attributes();
 			this.render_functions();
 			return this;
 		},
-		render_url: function() {
+		render_path: function() {
 			var html = '';
-			html += '<div class="url"><h4>url:<p>' + this.model.url + '</p></h4></div>';
+			html += '<div class="url"><h4>Path:<p>' + this.model.path + '</p></h4></div>';
 			$(this.el).append(html);
 		},
 		render_attributes: function() {
@@ -47,11 +47,11 @@ $(function() {
 							title: 'Set "' + key + '"',
 							content: content
 						});
-						var notify = function(type, text) {
+						var notify = function(type, text, time) {
 							var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
 							a.alert();
 							variable.after(a);
-							setTimeout(_.bind(a.alert, a, 'close'), 2000);
+							if(time) setTimeout(_.bind(a.alert, a, 'close'), time);
 
 							variable.popover('hide');
 						}
@@ -62,12 +62,11 @@ $(function() {
 							variable.find('button').addClass('disabled');
 							try {
 								var val = variable.find('.input-large').val();
-								var v = eval(val);
-								this.model.bt.set(key, v).then(_.bind(function(data) {
+								var argtext = '(function() { return ' + val + ';})';
+								this.model.bt.set(key, eval(argtext)()).then(_.bind(function(data) {
 									console.log(JSON.stringify(data));
-									var path = this.model.url.split('/');
-									for(var i = 0; i < path.length - 1; i++) {
-										var link = decodeURIComponent(path[i]);
+									for(var i = 0; i < this.model.path.length; i++) {
+										var link = decodeURIComponent(this.model.path[i]);
 										if(!(link in data)) {
 											notify('error', 'return value malformed: ' + JSON.stringify(data));
 											return;
@@ -75,15 +74,15 @@ $(function() {
 										data = data[link];
 									}
 									if('set' in data && data.set === 'success') {
-										notify('success', data.set);
+										notify('success', data.set, 2000);
 									} else {
-										notify('default', data.set);
+										notify('default', data.set, 2000);
 									}
 								}, this)).fail(function() {
-									notify('error', 'failed to set ' + key + ' for unknown reason.');
+									notify('error', 'failed to set ' + key + ' for unknown reason.', 2000);
 								});
 							} catch(e) {
-								notify('error', 'failed to evaluate ' + val);
+								notify('error', 'failed to evaluate ' + val, 2000);
 							}
 						}, this));
 					}
@@ -113,7 +112,7 @@ $(function() {
 						
 						var content = '<form class="well form-inline">';
 						for(var j = 0; j < args.length; j++) {
-							content += '<input type="text" class="input-large" placeholder="' + args[j] + '"><br>';
+							content += '<input type="text" class="arg input-large" placeholder="' + args[j] + '"><br>';
 						}
 						content += '<button type="submit" class="btn">Call Function</button>';
 						content += '</form>';
@@ -125,11 +124,11 @@ $(function() {
 							title: 'Call ' + key,
 							content: content
 						});
-						var notify = function(type, text) {
+						var notify = function(type, text, time) {
 							var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
 							a.alert();
 							signature.after(a);
-							setTimeout(_.bind(a.alert, a, 'close'), 2000);
+							if(time) setTimeout(_.bind(a.alert, a, 'close'), time);
 
 							signature.popover('hide');
 						}
@@ -139,11 +138,22 @@ $(function() {
 
 							signature.find('button').addClass('disabled');
 							try {
-								this.model.bt[key]().then(_.bind(function(data) {
+								//build a series of strings that we can eval into an argument list for our function
+								//eval("(function() { return [function() { alert('hi'); }];})")()[0]()
+
+								var argtext = '(function() { return ['
+								var elems = this.$el.find('.arg');
+								_.each(elems, function(elem, count) { 
+									if(count > 0) argtext += ',';
+									argtext += $(elem).val();
+								});
+								argtext += ']})';
+								var argarray = eval(argtext)();
+
+								this.model.bt[key].apply(this, argarray).then(_.bind(function(data) {
 									console.log(JSON.stringify(data));
-									var path = this.model.url.split('/');
-									for(var i = 0; i < path.length - 1; i++) {
-										var link = decodeURIComponent(path[i]);
+									for(var i = 0; i < this.model.path.length; i++) {
+										var link = decodeURIComponent(this.model.path[i]);
 										if(!(link in data)) {
 											notify('error', 'return value malformed: ' + JSON.stringify(data));
 											return;
@@ -151,15 +161,15 @@ $(function() {
 										data = data[link];
 									}
 									if(key in data) {
-										notify('success', JSON.stringify(data[key]));
+										notify('success', JSON.stringify(data[key]), 2000);
 									} else {
-										notify('default', data.set);
+										notify('default', data.set, 2000);
 									}
 								}, this)).fail(function() {
-									notify('error', 'failed to call ' + symbol + ' for unknown reason.');
+									notify('error', 'failed to call ' + symbol + ' for unknown reason.', 2000);
 								});
 							} catch(e) {
-								notify('error', JSON.stringify(e));
+								notify('error', JSON.stringify(e), 2000);
 							}
 						}, this));					
 					}
@@ -191,8 +201,7 @@ $(function() {
 			$('#content').append(this.content.render().el);
 		},
 		render_label: function() {
-			var toks = this.model.url.split('/');
-			var link = $('<a href="#">' + unescape(toks[toks.length-2]) + '</a>');
+			var link = $('<a href="#">' + unescape(this.model.path[this.model.path.length-1]) + '</a>');
 			link.click(this.content.show);
 			$(this.el).append(link);
 		},
@@ -236,7 +245,7 @@ $(function() {
 		},
 		render: function() {
 			$(this.el).empty();
-			if(!this.model.url) {
+			if(!this.model.path) {
 				return this;
 			}
 
@@ -254,11 +263,11 @@ $(function() {
 			this.model.each(this._add);
 		},
 		_add: function(model) {
-			this._views[model.url] = new BtappModelSidebarView({'model':model});
+			this._views[model.path] = new BtappModelSidebarView({'model':model});
 		},
 		_remove: function(model) {
-			this._views[model.url].remove();
-			delete this._views[model.url];
+			this._views[model.path].remove();
+			delete this._views[model.path];
 		}
 	});
 	BtappModelSidebarView = BtappSidebarView.extend({
@@ -272,16 +281,16 @@ $(function() {
 		_add: function(attribute) {
 			if(typeof attribute === 'object' && attribute !== null && 'bt' in attribute) {
 				if('length' in attribute) {
-					this._views[attribute.url] = new BtappCollectionSidebarView({'model':attribute});
+					this._views[attribute.path] = new BtappCollectionSidebarView({'model':attribute});
 				} else {
-					this._views[attribute.url] = new BtappModelSidebarView({'model':attribute});
+					this._views[attribute.path] = new BtappModelSidebarView({'model':attribute});
 				}
 			}
 		},
 		_remove: function(attribute) {
 			if(typeof attribute === 'object' && attribute !== null && 'bt' in attribute) {
 				for(var v in this._views) {
-					if(this._views[v].model.url === attribute.url) {
+					if(this._views[v].model.path === attribute.path) {
 						this._views[v].model.trigger('destroy');
 						delete this._views[v];
 					}
@@ -300,7 +309,7 @@ $(function() {
 		btapp.disconnect();
 		btapp.connect({
 			product: $('#productname option:selected').val(), 
-			queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
+			queries: Btapp.QUERIES[$('#queries option:selected').val()]
 		});
 	});
 
@@ -321,7 +330,7 @@ $(function() {
 
 	btapp.connect({
 		product: $('#productname option:selected').val(), 
-		queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
+		queries: Btapp.QUERIES[$('#queries option:selected').val()]
 	});
 
 	btappview = new BtappModelSidebarView({'model':btapp});
