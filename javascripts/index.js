@@ -366,7 +366,7 @@ $(function() {
 					username: name,
 					password: password,
 					product: $('#productname option:selected').val(),
-					queries: [ Btapp.QUERIES[$('#queries option:selected').val()]]
+					queries: Btapp.QUERIES[$('#queries option:selected').val()]
 				});
 			}
 		}, this);
