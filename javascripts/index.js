@@ -64,22 +64,13 @@ $(function() {
 								var val = variable.find('.input-large').val();
 								var argtext = '(function() { return ' + val + ';})';
 								this.model.bt.set(key, eval(argtext)()).then(_.bind(function(data) {
-									console.log(JSON.stringify(data));
-									for(var i = 0; i < this.model.path.length; i++) {
-										var link = decodeURIComponent(this.model.path[i]);
-										if(!(link in data)) {
-											notify('error', 'return value malformed: ' + JSON.stringify(data));
-											return;
-										}
-										data = data[link];
-									}
-									if('set' in data && data.set === 'success') {
-										notify('success', data.set, 2000);
+									if(data === 'success') {
+										notify('success', data, 2000);
 									} else {
-										notify('default', data.set, 2000);
+										notify('default', data, 2000);
 									}
-								}, this)).fail(function() {
-									notify('error', 'failed to set ' + key + ' for unknown reason.', 2000);
+								}, this)).fail(function(data) {
+									notify('error', 'failed to set ' + key + ': ' + data, 2000);
 								});
 							} catch(e) {
 								notify('error', 'failed to evaluate ' + val, 2000);
@@ -152,18 +143,10 @@ $(function() {
 
 								this.model.bt[key].apply(this, argarray).then(_.bind(function(data) {
 									console.log(JSON.stringify(data));
-									for(var i = 0; i < this.model.path.length; i++) {
-										var link = decodeURIComponent(this.model.path[i]);
-										if(!(link in data)) {
-											notify('error', 'return value malformed: ' + JSON.stringify(data));
-											return;
-										}
-										data = data[link];
-									}
-									if(key in data) {
-										notify('success', JSON.stringify(data[key]), 2000);
+									if(data) {
+										notify('success', JSON.stringify(data), 2000);
 									} else {
-										notify('default', data.set, 2000);
+										notify('default', data, 2000);
 									}
 								}, this)).fail(function() {
 									notify('error', 'failed to call ' + symbol + ' for unknown reason.', 2000);
