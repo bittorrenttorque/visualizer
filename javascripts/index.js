@@ -183,7 +183,16 @@ $(function() {
 		},
 		render_label: function() {
 			var link = $('<a href="#">' + unescape(this.model.path[this.model.path.length-1]) + '</a>');
-			link.click(this.content.show);
+			if(this.content.$el.is(':visible')) {
+				link.addClass('highlighted');
+			}
+			link.click(_.bind(function() {
+				$('.highlighted').removeClass('highlighted');
+				this.content.show();
+				if(this.content.$el.is(':visible')) {
+					link.addClass('highlighted');
+				}				
+			}, this));
 			$(this.el).append(link);
 		},
 		render_toggle: function() {

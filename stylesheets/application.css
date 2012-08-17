@@ -66,6 +66,10 @@ body {
 #sidebar .down {
 	background-image: url('../images/down.png') !important;
 }
+#sidebar a.highlighted {
+	font-weight: bold;
+	font-size: 14px;
+}
 #content {
 	position:absolute;
 	top:0px;
