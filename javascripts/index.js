@@ -89,73 +89,71 @@ $(function() {
 			functions.append(header);
 
 			_.each(this.model.bt, function(z, key) {
-				if(this.model.hasOwnProperty(key)) {
-					var signatures = this.model.bt[key].valueOf().split('(');
-					var symbol = $('<p>' + key + ':</p>');
-					functions.append(symbol);
+				var signatures = this.model.bt[key].valueOf().split('(');
+				var symbol = $('<p>' + key + ':</p>');
+				functions.append(symbol);
 
-					for(var i = 1; i < signatures.length; i++) {
-						var signature = $('<p><span>function</span>(' + ((signatures[i] !== ')') ? signatures[i] : ')') + '</p>');
-						functions.append(signature);
-						var content = '<button type="submit" class="btn">Call Function</button>';
-						var argsraw = signatures[i].substring(0, signatures[i].length - 1);
-						var args = argsraw.length > 0 ? argsraw.split(',') : [];
-						
-						var content = '<form class="well form-inline">';
-						for(var j = 0; j < args.length; j++) {
-							content += '<input type="text" class="arg input-large" placeholder="' + args[j] + '"><br>';
-						}
-						content += '<button type="submit" class="btn">Call Function</button>';
-						content += '</form>';
-						
-						signature.popover({
-							animation: true,
-							placement: 'in bottom',
-							trigger: 'hover',
-							title: 'Call ' + key,
-							content: content
-						});
-						var notify = function(type, text, time) {
-							var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
-							a.alert();
-							signature.after(a);
-							if(time) setTimeout(_.bind(a.alert, a, 'close'), time);
-
-							signature.popover('hide');
-						}
-						signature.on('submit', _.bind(function(e) {
-							e.preventDefault();
-							if(signature.find('button').hasClass('disabled')) return;
-
-							signature.find('button').addClass('disabled');
-							try {
-								//build a series of strings that we can eval into an argument list for our function
-								//eval("(function() { return [function() { alert('hi'); }];})")()[0]()
-
-								var argtext = '(function() { return ['
-								var elems = this.$el.find('.arg');
-								_.each(elems, function(elem, count) { 
-									if(count > 0) argtext += ',';
-									argtext += $(elem).val();
-								});
-								argtext += ']})';
-								var argarray = eval(argtext)();
-
-								this.model.bt[key].apply(this, argarray).then(_.bind(function(data) {
-									console.log(JSON.stringify(data));
-									if(data) {
-										notify('success', JSON.stringify(data), 2000);
-									} else {
-										notify('default', data, 2000);
-									}
-								}, this)).fail(function() {
-									notify('error', 'failed to call ' + symbol + ' for unknown reason.', 2000);
-								});
-							} catch(e) {
-								notify('error', JSON.stringify(e), 2000);
-							}
-						}, this));					
+				for(var i = 1; i < signatures.length; i++) {
+					var signature = $('<p><span>function</span>(' + ((signatures[i] !== ')') ? signatures[i] : ')') + '</p>');
+					functions.append(signature);
+					var content = '<button type="submit" class="btn">Call Function</button>';
+					var argsraw = signatures[i].substring(0, signatures[i].length - 1);
+					var args = argsraw.length > 0 ? argsraw.split(',') : [];
+					
+					var content = '<form class="well form-inline">';
+					for(var j = 0; j < args.length; j++) {
+						content += '<input type="text" class="arg input-large" placeholder="' + args[j] + '"><br>';
 					}
+					content += '<button type="submit" class="btn">Call Function</button>';
+					content += '</form>';
+					
+					signature.popover({
+						animation: true,
+						placement: 'in bottom',
+						trigger: 'hover',
+						title: 'Call ' + key,
+						content: content
+					});
+					var notify = function(type, text, time) {
+						var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
+						a.alert();
+						signature.after(a);
+						if(time) setTimeout(_.bind(a.alert, a, 'close'), time);
+
+						signature.popover('hide');
+					}
+					signature.on('submit', _.bind(function(e) {
+						e.preventDefault();
+						if(signature.find('button').hasClass('disabled')) return;
+
+						signature.find('button').addClass('disabled');
+						try {
+							//build a series of strings that we can eval into an argument list for our function
+							//eval("(function() { return [function() { alert('hi'); }];})")()[0]()
+
+							var argtext = '(function() { return ['
+							var elems = this.$el.find('.arg');
+							_.each(elems, function(elem, count) { 
+								if(count > 0) argtext += ',';
+								argtext += $(elem).val();
+							});
+							argtext += ']})';
+							var argarray = eval(argtext)();
+
+							this.model.bt[key].apply(this, argarray).then(_.bind(function(data) {
+								console.log(JSON.stringify(data));
+								if(data) {
+									notify('success', JSON.stringify(data), 2000);
+								} else {
+									notify('default', data, 2000);
+								}
+							}, this)).fail(function() {
+								notify('error', 'failed to call ' + symbol + ' for unknown reason.', 2000);
+							});
+						} catch(e) {
+							notify('error', JSON.stringify(e), 2000);
+						}
+					}, this));					
 				}
 			}, this);
 			$(this.el).append(functions);
