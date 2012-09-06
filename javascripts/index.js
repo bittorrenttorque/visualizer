@@ -331,7 +331,7 @@ $(function() {
 	$('#adddemocontent').click(function() {
 		if(btappview.model.get('add')) {
 			var rss_feed_url = 'http://www.clearbits.net/feeds/cat/movies.rss';
-			var torrent_url = 'http://www.clearbits.net/get/1766-the-tunnel.torrent';
+			var torrent_url = 'http://www.clearbits.net/get/1425-no-guns-for-jews---dvd-version.torrent';
 			btappview.model.get('add').rss_feed(rss_feed_url);
 			btappview.model.get('add').torrent(torrent_url, 'demo_torrents');
 		} else {
