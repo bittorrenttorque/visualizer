@@ -182,7 +182,11 @@ $(function() {
 			$('#content').append(this.content.render().el);
 		},
 		render_label: function() {
-			var link = $('<a href="#">' + unescape(this.model.path[this.model.path.length-1]) + '</a>');
+			var label = unescape(this.model.path[this.model.path.length-1]);
+			if(this.model instanceof Backbone.Collection) {
+				label += ' (' + this.model.length + ')';
+			}
+			var link = $('<a href="#">' + label + '</a>');
 			if(this.content.$el.is(':visible')) {
 				link.addClass('highlighted');
 			}
