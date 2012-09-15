@@ -1,15 +1,19 @@
 $(function() {
-	var content_visible = null;
+	var _content = null;
 	BtappContentView = Backbone.View.extend({
 		tagName: "div",
 		className: "content",
 		initialize: function() {
-			_.bindAll(this, 'render', 'show', 'remove');
-			this.model.bind('add remove change', this.render);
-			this.model.bind('destroy', this.remove);
-			$(this.el).hide();
+			this.model.on('add remove change', this.render, this);
+			this.model.on('destroy', this.destroy, this);
+		},
+		destroy: function() {
+			this.model.off('add remove change', this.render, this);
+			this.model.off('destroy', this.destroy, this);
+			return this;
 		},
 		render: function() {
+			console.log('render content');
 			$(this.el).empty();
 			if(!this.model.path) {
 				return this;
@@ -157,13 +161,6 @@ $(function() {
 				}
 			}, this);
 			$(this.el).append(functions);
-		},
-		show: function() {
-			if(content_visible) {
-				$(content_visible.el).hide();
-			}
-			$(this.el).show();
-			content_visible = this;
 		}
 	});
 
@@ -174,12 +171,10 @@ $(function() {
 			_.bindAll(this, 'render', '_add', '_remove', 'remove');
 			this.model.bind('add', this._add);
 			this.model.bind('remove', this._remove);
-			this.model.bind('add remove change', this.render);
+			this.model.bind('add remove', this.render);
 			this.expanded = true;
 			this._views = {};
-
-			this.content = new BtappContentView({'model':this.model});
-			$('#content').append(this.content.render().el);
+			this.renders = 0;
 		},
 		render_label: function() {
 			var label = unescape(this.model.path[this.model.path.length-1]);
@@ -187,15 +182,15 @@ $(function() {
 				label += ' (' + this.model.length + ')';
 			}
 			var link = $('<a href="#">' + label + '</a>');
-			if(this.content.$el.is(':visible')) {
-				link.addClass('highlighted');
-			}
 			link.click(_.bind(function() {
 				$('.highlighted').removeClass('highlighted');
-				this.content.show();
-				if(this.content.$el.is(':visible')) {
-					link.addClass('highlighted');
-				}				
+
+				if(_content)
+					_content.destroy().remove();
+				_content = new BtappContentView({'model':this.model});
+				$('#content').append(_content.render().$el);
+
+				link.addClass('highlighted');
 			}, this));
 			$(this.el).append(link);
 		},
@@ -330,8 +325,7 @@ $(function() {
 	btappview = new BtappModelSidebarView({'model':btapp});
 	btappview.expanded = true;
 	$('#data').append(btappview.render().el);
-	btappview.content.show();
-	
+
 	$('#adddemocontent').click(function() {
 		if(btappview.model.get('add')) {
 			var rss_feed_url = 'http://www.clearbits.net/feeds/cat/movies.rss';
@@ -369,4 +363,6 @@ $(function() {
 			password
 		);
 	});
+
+	btappview.$el.find('a').click();
 });
