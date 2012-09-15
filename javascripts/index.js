@@ -1,19 +1,27 @@
 $(function() {
 	var _content = null;
+	var _num_render_content = 0;
+	var _num_render_sidebar = 0;
 	BtappContentView = Backbone.View.extend({
 		tagName: "div",
 		className: "content",
 		initialize: function() {
-			this.model.on('add remove change', this.render, this);
+			var _this = this;
+			this.df_db_render = _.debounce(function() {
+				_.defer(function() {
+					_this.render();
+				});
+			});
+			this.model.on('add remove change', this.df_db_render, this);
 			this.model.on('destroy', this.destroy, this);
 		},
 		destroy: function() {
-			this.model.off('add remove change', this.render, this);
+			this.model.off('add remove change', this.df_db_render, this);
 			this.model.off('destroy', this.destroy, this);
 			return this;
 		},
 		render: function() {
-			console.log('render content');
+			//console.log('render content - ' + (++_num_render_content));
 			$(this.el).empty();
 			if(!this.model.path) {
 				return this;
@@ -168,11 +176,11 @@ $(function() {
 		tagName: "div",
 		initialize: function() {
 			Backbone.View.prototype.initialize.apply(this, arguments);	
-			_.bindAll(this, 'render', '_add', '_remove', 'remove');
-			this.model.bind('add', this._add);
-			this.model.bind('remove', this._remove);
-			this.model.bind('add remove', this.render);
-			this.expanded = true;
+			this.model.on('add', this._add, this);
+			this.model.on('remove', this._remove, this);
+			this.drender = _.debounce(this.render, 100);
+			this.model.on('add remove', this.drender, this);
+			this.expanded = this.model.path.length <= 2;
 			this._views = {};
 			this.renders = 0;
 		},
@@ -233,6 +241,7 @@ $(function() {
 			}
 		},
 		render: function() {
+			//console.log('render sidebar - ' + (++_num_render_sidebar));
 			$(this.el).empty();
 			if(!this.model.path) {
 				return this;
@@ -249,7 +258,7 @@ $(function() {
 		tagName: "div",
 		initialize: function() {
 			BtappSidebarView.prototype.initialize.apply(this, arguments);	
-			this.model.each(this._add);
+			this.model.each(this._add, this);
 		},
 		_add: function(model) {
 			this._views[model.path] = new BtappModelSidebarView({'model':model});
@@ -264,7 +273,7 @@ $(function() {
 		initialize: function() {
 			BtappSidebarView.prototype.initialize.apply(this, arguments);	
 			_.each(this.model.attributes, _.bind(function(value, key) {
-				this._add(value);
+				this._add(value, this);
 			}, this));
 		},
 		_add: function(attribute) {
