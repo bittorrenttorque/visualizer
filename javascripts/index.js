@@ -298,80 +298,9 @@ $(function() {
 	});
 
 	var btapp = new Btapp;
-	_(Btapp.QUERIES).each(function(query, label) {
-		var input = $('<option>' + label + '</option>');
-		$('#queries').append(input);
-	});
-
-	$('#queries').change(function(val) {
-		btapp.disconnect();
-		btapp.connect({
-			product: $('#productname option:selected').val(), 
-			queries: Btapp.QUERIES[$('#queries option:selected').val()]
-		});
-	});
-
-	$('#productname').append('<option>Torque</option>');
-	$('#productname').append('<option>uTorrent</option>');
-
-	$('#productname').change(function(val) {
-		var querykey = $('#queries option:selected').val();
-		btapp.disconnect();
-		var product = $('#productname option:selected').val();
-		btapp.connect({
-			product: product, 
-			queries: [ Btapp.QUERIES[querykey] ],
-			plugin: product == 'Torque',
-			pairing_type: product == 'Torque' ? 'iframe' : 'native'
-		});
-	});
-
-	btapp.connect({
-		product: $('#productname option:selected').val(), 
-		queries: Btapp.QUERIES[$('#queries option:selected').val()]
-	});
+	btapp.connect();
 
 	btappview = new BtappModelSidebarView({'model':btapp});
 	btappview.expanded = true;
 	$('#data').append(btappview.render().el);
-
-	$('#adddemocontent').click(function() {
-		if(btappview.model.get('add')) {
-			var rss_feed_url = 'http://www.clearbits.net/feeds/cat/movies.rss';
-			var torrent_url = 'http://www.clearbits.net/get/1424-no-guns-for-jews---mp4-version.torrent';
-			btappview.model.get('add').rss_feed(rss_feed_url);
-			btappview.model.get('add').torrent(torrent_url, 'demo_torrents');
-		} else {
-			alert('not connected to a torrent client...sad times');
-		}
-	});
-	$('#removedemocontent').click(function() {
-		var torrents = btappview.model.get('torrent');
-		if(torrents) {
-			var torrent = btappview.model.get('torrent').get('btapp/torrent/all/0819CCEE9EBE25D7A02FE14496D58AF10EF94AEC/');
-			torrent && torrent.remove();
-		}
-	});
-	$('#connectremote').click(function() {
-		var name = prompt("Please enter a username");
-		var password = prompt("Please enter a password");
-		btapp.bind('remoteStatus', function(status) {
-			if(status.status === "Status: Accessible") {
-				alert('Client connected to falcon...connecting our btapp object through falcon instead of via localhost');
-				btapp.disconnect();
-				btapp.connect({
-					username: name,
-					password: password,
-					product: $('#productname option:selected').val(),
-					queries: Btapp.QUERIES[$('#queries option:selected').val()]
-				});
-			}
-		}, this);
-		btapp.connect_remote(
-			name, 
-			password
-		);
-	});
-
-	btappview.$el.find('a').click();
 });
