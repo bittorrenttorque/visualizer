@@ -153,6 +153,9 @@ $(function() {
 							var argarray = eval(argtext)();
 
 							this.model.bt[key].apply(this, argarray).then(_.bind(function(data) {
+								if(typeof data === 'function') {
+									data = data.toString();
+								}
 								console.log(JSON.stringify(data));
 								if(data) {
 									notify('success', JSON.stringify(data), 2000);
