@@ -44,7 +44,10 @@ $(function() {
 			_(this.model.attributes).each(function(attribute, key) {
 				if(this.model.attributes.hasOwnProperty(key)) {
 					if(!(typeof attribute === 'object' && attribute !== null && 'bt' in attribute)) {
-						var container = $('<span></span>');
+						if(typeof attribute === 'string') {
+							attribute = '\"' + attribute + '\"';
+						}
+						var container = $('<pre></pre>');
 						var variable = $('<p><span>' + key + '</span>: ' + attribute + '</p>');
 						var form = $(
 							'<form class="well form-inline">' + 
@@ -73,9 +76,10 @@ $(function() {
 							notification.addClass(typeclass);
 							notification.show();
 							setTimeout(function() {
-								notification.removeClass(typeclass);
-								notification.hide();
-								ret.resolve();
+								notification.toggle('slow', function() {
+									notification.removeClass(typeclass);
+									ret.resolve();
+								});
 							}, 2000);
 							return ret;
 						}
@@ -126,7 +130,7 @@ $(function() {
 
 				_(signatures.length-1).times(function(i) {
 					++i;
-					var container = $('<span></span>');
+					var container = $('<pre></pre>');
 					var signature = $('<p><span>function</span>(' + ((signatures[i] !== ')') ? signatures[i] : ')') + '</p>');
 					var content = '<button type="submit" class="btn">Call Function</button>';
 					var argsraw = signatures[i].substring(0, signatures[i].length - 1);
@@ -165,8 +169,8 @@ $(function() {
 						setTimeout(function() {
 							notification.toggle('slow', function() {
 								notification.removeClass(typeclass);
+								ret.resolve();
 							});
-							ret.resolve();
 						}, 2000);
 						return ret;
 					}
