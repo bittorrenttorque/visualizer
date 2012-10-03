@@ -44,48 +44,67 @@ $(function() {
 			_(this.model.attributes).each(function(attribute, key) {
 				if(this.model.attributes.hasOwnProperty(key)) {
 					if(!(typeof attribute === 'object' && attribute !== null && 'bt' in attribute)) {
+						var container = $('<span></span>');
 						var variable = $('<p><span>' + key + '</span>: ' + attribute + '</p>');
-						variables.append(variable);
-
-						var content = '<form class="well form-inline">' + 
-								'<input type="text" class="input-large" placeholder="' + attribute + '">' + 
-								'<button type="submit" class="btn">' + 'Set' + '</button>' +
-								'</form>';
-
-						variable.popover({
-							animation: true,
-							placement: 'in bottom',
-							trigger: 'hover',
-							title: 'Set "' + key + '"',
-							content: content
+						var form = $(
+							'<form class="well form-inline">' + 
+							'<input type="text" class="input-large" placeholder="' + attribute + '">' + 
+							'<button type="submit" class="btn">' + 'Set' + '</button>' +
+							'</form>'
+						);
+						var notification = $('<div class="alert"></div>');
+						notification.alert();
+						notification.hide();
+						form.hide();
+						container.hover(function() {
+							form.show();
+						}, function() {
+							form.hide();
 						});
-						var notify = function(type, text, time) {
-							var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
-							a.alert();
-							variable.after(a);
-							if(time) setTimeout(_.bind(a.alert, a, 'close'), time);
+						container.append(variable);
+						container.append(form);
+						container.append(notification);
+						variables.append(container);
 
-							variable.popover('hide');
+						var notify = function(type, text) {
+							var ret = new jQuery.Deferred;
+							var typeclass = 'alert-' + type;
+							notification.text(text);
+							notification.addClass(typeclass);
+							notification.show();
+							setTimeout(function() {
+								notification.removeClass(typeclass);
+								notification.hide();
+								ret.resolve();
+							}, 2000);
+							return ret;
 						}
-						variable.on('submit', _.bind(function(e) {
+						form.on('submit', _.bind(function(e) {
 							e.preventDefault();
-							if(variable.find('button').hasClass('disabled')) return;
+							var button = form.find('button');
+							if(button.hasClass('disabled')) return;
 
-							variable.find('button').addClass('disabled');
+							button.addClass('disabled');
+							var enable = function() {
+								button.removeClass('disabled');
+							};
 							try {
-								var val = variable.find('.input-large').val();
+								var val = form.find('.input-large').val();
 								var argtext = '(function() { return ' + val + ';})';
-								this.model.bt.set(key, eval(argtext)()).then(_.bind(function(data) {
+								var evalval = eval(argtext)();
+								var setret = this.model.bt.set(key, evalval);
+								setret.done(_.bind(function(data) {
 									if(data === 'success') {
-										notify('success', data, 2000);
+										notify('success', data).then(enable);;
 									} else {
-										notify('default', data, 2000);
+										notify('default', data).then(enable);;
 									}
-								}, this)).fail(function(data) {
-									notify('error', 'failed to set ' + key + ': ' + data, 2000);
+								}, this));
+								setret.fail(function(data) {
+									notify('error', 'failed to set ' + key + ': ' + data).then(enable);
 								});
 							} catch(e) {
-								notify('error', 'failed to evaluate ' + val, 2000);
+								notify('error', 'failed to evaluate ' + val).then(enable);;
 							}
 						}, this));
 					}
@@ -105,46 +124,68 @@ $(function() {
 				var symbol = $('<p>' + key + ':</p>');
 				functions.append(symbol);
 
-				for(var i = 1; i < signatures.length; i++) {
+				_(signatures.length-1).times(function(i) {
+					++i;
+					var container = $('<span></span>');
 					var signature = $('<p><span>function</span>(' + ((signatures[i] !== ')') ? signatures[i] : ')') + '</p>');
-					functions.append(signature);
 					var content = '<button type="submit" class="btn">Call Function</button>';
 					var argsraw = signatures[i].substring(0, signatures[i].length - 1);
 					var args = argsraw.length > 0 ? argsraw.split(',') : [];
 					
 					var content = '<form class="well form-inline">';
 					for(var j = 0; j < args.length; j++) {
-						content += '<input type="text" class="arg input-large" placeholder="' + args[j] + '"><br>';
+						content += '<input type="text" class="arg input-large" placeholder="' + args[j] + '">';
 					}
 					content += '<button type="submit" class="btn">Call Function</button>';
 					content += '</form>';
-					
-					signature.popover({
-						animation: true,
-						placement: 'in bottom',
-						trigger: 'hover',
-						title: 'Call ' + key,
-						content: content
-					});
-					var notify = function(type, text, time) {
-						var a = $('<div class="alert alert-' + type + '">' + text + '</div>');
-						a.alert();
-						signature.after(a);
-						if(time) setTimeout(_.bind(a.alert, a, 'close'), time);
+					var form = $(content);
+					form.hide();
 
-						signature.popover('hide');
+					var notification = $('<div class="alert"></div>');
+					notification.alert();
+					notification.hide();
+
+					container.append(signature);
+					container.append(form);
+					container.append(notification);
+					functions.append(container);
+
+					container.hover(function() {
+						form.show();
+					}, function() {
+						form.hide();
+					});					
+
+					var notify = function(type, text) {
+						var ret = new jQuery.Deferred;
+						var typeclass = 'alert-' + type;
+						notification.text(text);
+						notification.addClass(typeclass);
+						notification.toggle('slow');
+						setTimeout(function() {
+							notification.toggle('slow', function() {
+								notification.removeClass(typeclass);
+							});
+							ret.resolve();
+						}, 2000);
+						return ret;
 					}
-					signature.on('submit', _.bind(function(e) {
-						e.preventDefault();
-						if(signature.find('button').hasClass('disabled')) return;
 
-						signature.find('button').addClass('disabled');
+					form.on('submit', _.bind(function(e) {
+						e.preventDefault();
+						var button = form.find('button');
+						if(button.hasClass('disabled')) return;
+
+						button.addClass('disabled');
+						var enable = function() {
+							button.removeClass('disabled');
+						}
 						try {
 							//build a series of strings that we can eval into an argument list for our function
 							//eval("(function() { return [function() { alert('hi'); }];})")()[0]()
 
 							var argtext = '(function() { return ['
-							var elems = this.$el.find('.arg');
+							var elems = form.find('.arg');
 							_.each(elems, function(elem, count) { 
 								if(count > 0) argtext += ',';
 								argtext += $(elem).val();
@@ -158,18 +199,18 @@ $(function() {
 								}
 								console.log(JSON.stringify(data));
 								if(data) {
-									notify('success', JSON.stringify(data), 2000);
+									notify('success', JSON.stringify(data)).then(enable);
 								} else {
-									notify('default', data, 2000);
+									notify('default', data).then(enable);
 								}
 							}, this)).fail(function() {
-								notify('error', 'failed to call ' + symbol + ' for unknown reason.', 2000);
+								notify('error', 'failed to call ' + symbol + ' for unknown reason.').then(enable);
 							});
 						} catch(e) {
-							notify('error', JSON.stringify(e), 2000);
+							notify('error', JSON.stringify(e)).then(enable);
 						}
 					}, this));					
-				}
+				}, this);
 			}, this);
 			$(this.el).append(functions);
 		}
