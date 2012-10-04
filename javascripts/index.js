@@ -16,25 +16,27 @@ $(function() {
 						if(typeof attribute === 'string') {
 							attribute = '\"' + attribute + '\"';
 						}
+
+						var template = _.template($('#attribute_template').html());
+
 						var container = $('<pre></pre>');
-						var variable = $('<p><span>' + key + '</span>: ' + attribute + '</p>');
-						var form = $(
-							'<form class="well form-inline">' + 
-							'<input type="text" class="input-large" placeholder="' + attribute + '">' + 
-							'<button type="submit" class="btn">' + 'Set' + '</button>' +
-							'</form>'
-						);
-						var notification = $('<div class="alert"></div>');
+						container.html(template({
+							key: key,
+							value: attribute
+						}));
+
+						var form = container.find('form');
+						form.hide();
+
+						var notification = container.find('.alert');
 						notification.alert();
 						notification.hide();
-						form.hide();
-						container.hover(function(xx) {
+
+						container.hover(function() {
 							form.show();
 						}, function() {
 							form.hide();
 						});
-						container.append(variable);
-						container.append(form);
 						container.append(notification);
 						this.$el.append(container);
 
