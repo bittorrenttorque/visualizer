@@ -2,45 +2,14 @@ $(function() {
 	var _content = null;
 	var _num_render_content = 0;
 	var _num_render_sidebar = 0;
-	BtappContentView = Backbone.View.extend({
-		tagName: "div",
-		className: "content",
+
+	BtappContentAttributesView = Backbone.View.extend({
 		initialize: function() {
-			var _this = this;
-			this.df_db_render = _.debounce(function() {
-				_.defer(function() {
-					_this.render();
-				});
-			});
-			this.model.on('add remove change', this.df_db_render, this);
-			this.model.on('destroy', this.destroy, this);
-		},
-		destroy: function() {
-			this.model.off('add remove change', this.df_db_render, this);
-			this.model.off('destroy', this.destroy, this);
-			return this;
+			this.template = _.template($('#attributes_template').html());
 		},
 		render: function() {
-			//console.log('render content - ' + (++_num_render_content));
-			$(this.el).empty();
-			if(!this.model.path) {
-				return this;
-			}
-			this.render_path();
-			this.render_attributes();
-			this.render_functions();
-			return this;
-		},
-		render_path: function() {
-			var html = '';
-			html += '<div class="url"><h4>Path:<p>' + this.model.path + '</p></h4></div>';
-			$(this.el).append(html);
-		},
-		render_attributes: function() {
-			var variables = $('<div></div>');
-			variables.addClass('variables');
-			var header = $('<h4>attributes:</h4>');
-			variables.append(header);
+			this.$el.html(this.template({}));
+
 			_(this.model.attributes).each(function(attribute, key) {
 				if(this.model.attributes.hasOwnProperty(key)) {
 					if(!(typeof attribute === 'object' && attribute !== null && 'bt' in attribute)) {
@@ -59,7 +28,7 @@ $(function() {
 						notification.alert();
 						notification.hide();
 						form.hide();
-						container.hover(function() {
+						container.hover(function(xx) {
 							form.show();
 						}, function() {
 							form.hide();
@@ -67,7 +36,7 @@ $(function() {
 						container.append(variable);
 						container.append(form);
 						container.append(notification);
-						variables.append(container);
+						this.$el.append(container);
 
 						var notify = function(type, text) {
 							var ret = new jQuery.Deferred;
@@ -114,26 +83,26 @@ $(function() {
 					}
 				}
 			}, this);
-			$(this.el).append(variables);
+			return this;
+		}
+	});
+	BtappContentFunctionsView = Backbone.View.extend({
+		initialize: function() {
+			this.template = _.template($('#functions_template').html());
 		},
-		render_functions: function() {
-			var functions = $('<div></div>');
-			functions.addClass('functions');
-			functions.css('position', 'relative');
-			var header = $('<h4>functions:</h4>');
-			functions.append(header);
-
-			_.each(this.model.bt, function(z, key) {
+		render: function() {
+			this.$el.html(this.template({}));
+			_.each(this.model.bt, function(fn, key) {
 				var signatures = this.model.bt[key].valueOf().split('(');
 				var symbol = $('<p>' + key + ':</p>');
-				functions.append(symbol);
+				this.$el.append(symbol);
 
 				_(signatures.length-1).times(function(i) {
 					++i;
+					var signature = signatures[i];
 					var container = $('<pre></pre>');
-					var signature = $('<p><span>function</span>(' + ((signatures[i] !== ')') ? signatures[i] : ')') + '</p>');
 					var content = '<button type="submit" class="btn">Call Function</button>';
-					var argsraw = signatures[i].substring(0, signatures[i].length - 1);
+					var argsraw = signature.substring(0, signature.length - 1);
 					var args = argsraw.length > 0 ? argsraw.split(',') : [];
 					
 					var content = '<form class="well form-inline">';
@@ -149,10 +118,10 @@ $(function() {
 					notification.alert();
 					notification.hide();
 
-					container.append(signature);
+					container.append($('<p><span>function</span>(' + ((signature !== ')') ? signature : ')') + '</p>'));
 					container.append(form);
 					container.append(notification);
-					functions.append(container);
+					this.$el.append(container);
 
 					container.hover(function() {
 						form.show();
@@ -216,7 +185,58 @@ $(function() {
 					}, this));					
 				}, this);
 			}, this);
-			$(this.el).append(functions);
+			return this;
+		}
+	});
+	BtappContentView = Backbone.View.extend({
+		tagName: "div",
+		className: "content",
+		initialize: function() {
+			this.template = _.template($('#content_template').html());
+			this.variableView = new BtappContentAttributesView({
+				model: this.model
+			});
+			this.functionView = new BtappContentFunctionsView({
+				model: this.model
+			});
+			var _this = this;
+			this.df_db_render = _.debounce(function() {
+				_.defer(function() {
+					_this.render();
+				});
+			});
+			this.model.on('add remove change', this.df_db_render, this);
+			this.model.on('destroy', this.destroy, this);
+		},
+		destroy: function() {
+			this.model.off('add remove change', this.df_db_render, this);
+			this.model.off('destroy', this.destroy, this);
+			return this;
+		},
+		assign : function (selector, view) {
+			var selectors;
+			if (_.isObject(selector)) {
+				selectors = selector;
+			} else {
+				selectors = {};
+				selectors[selector] = view;
+			}
+			if (!selectors) {
+				return;
+			}
+			_.each(selectors, function (view, selector) {
+				view.setElement(this.$(selector)).render();
+			}, this);
+		},
+		render: function() {
+			this.$el.html(this.template({
+				path: this.model.path
+			}));
+			this.assign({
+				'.variables': this.variableView,
+				'.functions': this.functionView
+			});
+			return this;
 		}
 	});
 
