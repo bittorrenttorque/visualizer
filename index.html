@@ -28,10 +28,11 @@
 		<div class="variables"></div>
 		<div class="functions"></div>
 	</script>
-	<script type="text/template" id="attribute_template"><p><%= key %>: <%= value %></p><form class="well form-inline"><input type="text" class="input-large" placeholder="<%= value %>"><button type="submit" class="btn">Set</button></form><div class="alert"></div></script>
+	<script type="text/template" id="attribute_template"><pre><p><span><%= key %>: </span><%= value %></p><form class="well form-inline"><input type="text" class="input-large" placeholder="<%= value %>"><button type="submit" class="btn">Set</button></form><div class="alert"></div></pre></script>
 
 	<script type="text/template" id="attributes_template">
 		<h4>attributes:</h4>
+		<ul class="attributes"></ul>
 	</script>
 	<script type="text/template" id="functions_template">
 		<h4>functions:</h4>

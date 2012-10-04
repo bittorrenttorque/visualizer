@@ -16,6 +16,10 @@ body {
 p {
 	margin: 0;
 }
+ul {
+	list-style: none;
+	margin-left: 0px;
+}
 .well, .alert {
 	margin-bottom: 0;
 	margin-top: 10px;

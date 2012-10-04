@@ -1,90 +1,103 @@
 $(function() {
 	var _content = null;
-	var _num_render_content = 0;
-	var _num_render_sidebar = 0;
+
+	BtappContentAttributeView = Backbone.View.extend({
+		tagName: 'li',
+		initialize: function() {
+			this.template = _.template($('#attribute_template').html());
+		},
+		notify: function(type, text) {
+			var notification = this.$el.find('.alert');
+			var ret = new jQuery.Deferred;
+			var typeclass = 'alert-' + type;
+			notification.text(text);
+			notification.addClass(typeclass);
+			notification.show();
+			setTimeout(function() {
+				notification.toggle('slow', function() {
+					notification.removeClass(typeclass);
+					ret.resolve();
+				});
+			}, 2000);
+			return ret;
+		},
+		render: function() {
+			var key = this.options.key;
+			var attribute = this.options.attribute;
+
+			this.$el.html(this.template({
+				key: key,
+				value: attribute
+			}));
+
+			var form = this.$el.find('form');
+			form.hide();
+
+			var notification = this.$el.find('.alert');
+			notification.alert();
+			notification.hide();
+
+			this.$el.hover(function() {
+				form.show();
+			}, function() {
+				form.hide();
+			});
+			this.$('pre').append(notification);
+
+			form.on('submit', _.bind(function(e) {
+				e.preventDefault();
+				var button = form.find('button');
+				if(button.hasClass('disabled')) return;
+
+				button.addClass('disabled');
+				var enable = function() {
+					button.removeClass('disabled');
+				};
+				try {
+					var val = form.find('.input-large').val();
+					var argtext = '(function() { return ' + val + ';})';
+					var evalval = eval(argtext)();
+					var setret = this.model.bt.set(key, evalval);
+					setret.done(_.bind(function(data) {
+						if(data === 'success') {
+							this.notify('success', data).then(enable);;
+						} else {
+							this.notify('default', data).then(enable);;
+						}
+					}, this));
+					setret.fail(function(data) {
+						this.notify('error', 'failed to set ' + key + ': ' + data).then(enable);
+					});
+				} catch(e) {
+					this.notify('error', 'failed to evaluate ' + val).then(enable);;
+				}
+			}, this));
+			return this;
+		}
+	});
 
 	BtappContentAttributesView = Backbone.View.extend({
 		initialize: function() {
 			this.template = _.template($('#attributes_template').html());
 		},
+		addAttribute: function(attribute, key) {
+			if(this.model.attributes.hasOwnProperty(key)) {
+				if(!(typeof attribute === 'object' && attribute !== null && 'bt' in attribute)) {
+					if(typeof attribute === 'string') {
+						attribute = '\"' + attribute + '\"';
+					}
+					var view = new BtappContentAttributeView({
+						model: this.model,
+						attribute: attribute,
+						key: key
+					});
+					this.$('.attributes').append(view.render().$el);
+				}
+			}
+		},
 		render: function() {
 			this.$el.html(this.template({}));
-
-			_(this.model.attributes).each(function(attribute, key) {
-				if(this.model.attributes.hasOwnProperty(key)) {
-					if(!(typeof attribute === 'object' && attribute !== null && 'bt' in attribute)) {
-						if(typeof attribute === 'string') {
-							attribute = '\"' + attribute + '\"';
-						}
-
-						var template = _.template($('#attribute_template').html());
-
-						var container = $('<pre></pre>');
-						container.html(template({
-							key: key,
-							value: attribute
-						}));
-
-						var form = container.find('form');
-						form.hide();
-
-						var notification = container.find('.alert');
-						notification.alert();
-						notification.hide();
-
-						container.hover(function() {
-							form.show();
-						}, function() {
-							form.hide();
-						});
-						container.append(notification);
-						this.$el.append(container);
-
-						var notify = function(type, text) {
-							var ret = new jQuery.Deferred;
-							var typeclass = 'alert-' + type;
-							notification.text(text);
-							notification.addClass(typeclass);
-							notification.show();
-							setTimeout(function() {
-								notification.toggle('slow', function() {
-									notification.removeClass(typeclass);
-									ret.resolve();
-								});
-							}, 2000);
-							return ret;
-						}
-						form.on('submit', _.bind(function(e) {
-							e.preventDefault();
-							var button = form.find('button');
-							if(button.hasClass('disabled')) return;
-
-							button.addClass('disabled');
-							var enable = function() {
-								button.removeClass('disabled');
-							};
-							try {
-								var val = form.find('.input-large').val();
-								var argtext = '(function() { return ' + val + ';})';
-								var evalval = eval(argtext)();
-								var setret = this.model.bt.set(key, evalval);
-								setret.done(_.bind(function(data) {
-									if(data === 'success') {
-										notify('success', data).then(enable);;
-									} else {
-										notify('default', data).then(enable);;
-									}
-								}, this));
-								setret.fail(function(data) {
-									notify('error', 'failed to set ' + key + ': ' + data).then(enable);
-								});
-							} catch(e) {
-								notify('error', 'failed to evaluate ' + val).then(enable);;
-							}
-						}, this));
-					}
-				}
-			}, this);
+			_(this.model.attributes).each(this.addAttribute, this);
 			return this;
 		}
 	});
@@ -311,7 +324,6 @@ $(function() {
 			}
 		},
 		render: function() {
-			//console.log('render sidebar - ' + (++_num_render_sidebar));
 			$(this.el).empty();
 			if(!this.model.path) {
 				return this;
