@@ -17,41 +17,71 @@
 	<script src="javascripts/btapp/plugin.btapp.js"></script>  
 	<script src="javascripts/btapp/pairing.btapp.js"></script>  
 
+	<script src="https://raw.github.com/wilhelm-murdoch/jQuery-Wiggle/master/lib/wiggle.jquery.js" type="text/javascript"></script>
+
+	<script src="javascripts/view.js" type="text/javascript"></script>
 	<script src="javascripts/index.js" type="text/javascript"></script>
 	<link rel="stylesheet" type="text/css" href="stylesheets/application.css"></link>
 </head>
 <body>
-	<script type="text/template" id="content_template">
-		<div class="url">
-			<h4>Path:<p> <%= path %> </p></h4>
-		</div>
-		<div class="variables"></div>
+	<script type="text/template" id="content_function_template">
+		<%= name %>
+	</script>
+	<script type="text/template" id="content_functions_template">
+		<h3>Functions:</h3>
 		<div class="functions"></div>
 	</script>
-	<script type="text/template" id="attribute_template"><pre><p><span><%= key %>: </span><%= value %></p><form class="well form-inline"><input type="text" class="input-large" placeholder="<%= value %>"><button type="submit" class="btn">Set</button></form><div class="alert"></div></pre></script>
 
-	<script type="text/template" id="attributes_template">
-		<h4>attributes:</h4>
-		<ul class="attributes"></ul>
-	</script>
-	<script type="text/template" id="functions_template">
-		<h4>functions:</h4>
+	<script type="text/template" id="content_attributes_template">
+		<h3>Attributes:</h3>
+		<div class="attributes"></div>
 	</script>
 
-	<div id="container">
-		<div id="sidebar">
-			<div id="introduction">
-				<h1 style="float:left;">btapp.js</h1>
-				<div id="license" style="clear:both;">
-					Btapp.js 0.1 (c) 2012 <br>
-					Patrick Williams, BitTorrent Inc.<br>
-					Licensed under the MIT License
-				</div>
-			</div>
-			<h4>Realtime data...</h4>
-			<br>
-			<div id="data"></div>
+	<script type="text/template" id="content_template">
+		<h3>Path:</h3>
+		<div><%= path %></div>
+		<div class="attributes_container"></div>
+		<div class="functions_container"></div>
+	</script>
+
+	<script type="text/template" id="sidebar_collection_template">
+		<a class="toggle">
+			<i class="icon-chevron-down"></i> 
+		</a>
+		<a class="sidebar_name">
+			<span><%= name %></span>
+			<span class="count badge badge-inverse"><%= model.length %></span>
+		</a>
+		<div class="sidebar_children">
 		</div>
-		<div id="content"></div>
+	</script>
+
+	<script type="text/template" id="sidebar_model_template">
+		<a class="toggle">
+			<i class="icon-chevron-down"></i> 
+		</a>
+		<a class="sidebar_name">
+			<span><%= name %><span>
+		</a>
+		<div class="sidebar_children">
+		</div>
+	</script>
+
+	<div class="container">
+		<div class="row">
+			<div class="sidebar span6">
+				<div>
+					<h1>btapp.js</h1>
+					<div>
+						Btapp.js 0.1 (c) 2012 <br>
+						Patrick Williams, BitTorrent Inc.<br>
+						Licensed under the MIT License
+					</div>
+				</div>
+				<br>
+				<div id="data"></div>
+			</div>
+			<div class="content span6">
+			</div>
 	</div>
 </body>
