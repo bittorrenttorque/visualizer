@@ -21,38 +21,36 @@
 	<link rel="stylesheet" type="text/css" href="stylesheets/application.css"></link>
 </head>
 <body>
+	<script type="text/template" id="content_template">
+		<div class="url">
+			<h4>Path:<p> <%= path %> </p></h4>
+		</div>
+		<div class="variables"></div>
+		<div class="functions"></div>
+	</script>
+	<script type="text/template" id="attribute_template"><pre><p><span><%= key %>: </span><%= value %></p><form class="well form-inline"><input type="text" class="input-large" placeholder="<%= value %>"><button type="submit" class="btn">Set</button></form><div class="alert"></div></pre></script>
+
+	<script type="text/template" id="attributes_template">
+		<h4>attributes:</h4>
+		<ul class="attributes"></ul>
+	</script>
+	<script type="text/template" id="functions_template">
+		<h4>functions:</h4>
+	</script>
+
 	<div id="container">
 		<div id="sidebar">
 			<div id="introduction">
 				<h1 style="float:left;">btapp.js</h1>
 				<div id="license" style="clear:both;">
-					Btapp.js 0.1
-					(c) 2012 Patrick Williams, BitTorrent Inc.<br>
+					Btapp.js 0.1 (c) 2012 <br>
+					Patrick Williams, BitTorrent Inc.<br>
 					Licensed under the MIT License
 				</div>
 			</div>
-			<hr align="left" style="width:90%">
-			<input id="adddemocontent" type="button" value="Add Demo Content"/>
-			<input id="removedemocontent" type="button" value="Remove Demo Content"/>
-			<input id="connectremote" type="button" value="View via remote"/><br>
-			<hr align="left" style="width:90%;">
-			Product: <select id="productname">
-			</select>
-			<span style="padding-left:25px">Queries: </span><select id="queries">
-				<!-- insert query checkboxes here -->
-			</select>
-			<hr align="left" style="width:90%">
 			<h4>Realtime data...</h4>
+			<br>
 			<div id="data"></div>
-			<hr align="left" style="width:90%">
-			<h4>Reference Links...</h4>
-			<div>
-				<ul>
-					<li><a href="http://torque.bittorrent.com">View example btapp.js apps</a></li>
-					<li><a href="http://documentup.com/bittorrenttorque/btapp/">View <b>btapp.js</b> documentation</a></li>
-					<li><a href="http://www.github.com/bittorrenttorque/btapp">Get <b>btapp.js</b> source code (GitHub)</a></li>
-				</ul>
-			</div>
 		</div>
 		<div id="content"></div>
 	</div>
