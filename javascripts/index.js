@@ -379,10 +379,10 @@ $(function() {
 		}
 	});
 
-	var btapp = new Btapp;
+	btapp = new Btapp;
 	btapp.connect();
 
-	btappview = new BtappModelSidebarView({'model':btapp});
+	var btappview = new BtappModelSidebarView({'model':btapp});
 	btappview.expanded = true;
 	$('#data').append(btappview.render().el);
 });
