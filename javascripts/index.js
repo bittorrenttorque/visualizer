@@ -380,7 +380,9 @@ $(function() {
 	});
 
 	btapp = new Btapp;
-	btapp.connect();
+	btapp.connect({
+		product: window.location.hostname.indexOf('soshareit') === -1 ? 'Torque' : 'SoShare'
+	});
 
 	var btappview = new BtappModelSidebarView({'model':btapp});
 	btappview.expanded = true;
