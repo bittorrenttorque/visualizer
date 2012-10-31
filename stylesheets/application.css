@@ -91,6 +91,7 @@ ul {
 	background:#f5f5ff;
 	border-left: 1px solid #e5e5ee;
 	padding-left: 25px;
+	padding-right: 25px;
 }
 #content > .content > div {
 	padding: 10px 0px 25px 0px;
