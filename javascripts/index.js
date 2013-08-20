@@ -381,7 +381,9 @@ $(function() {
 
 	btapp = new Btapp;
 	btapp.connect({
-		product: window.location.hostname.indexOf('soshareit') === -1 ? 'Torque' : 'SoShare'
+		product: 'uTorrent',
+		pairing_type: 'native',
+		plugin: false
 	});
 
 	var btappview = new BtappModelSidebarView({'model':btapp});
