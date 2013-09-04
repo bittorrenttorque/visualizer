@@ -41,11 +41,21 @@ ul {
 }
 #container {
 	position:absolute;
-	top:0px;
+	top:40px;
 	bottom:0px;
 	left:0px;
 	right:0px;
 	overflow:hidden;
+}
+#header {
+	position:absolute;
+	top:0px;
+	bottom: 40px;
+	left:0px;
+	right:0px;
+	overflow:hidden;
+	background-color:#777777;
+	padding:6px;
 }
 #sidebar {
 	position:absolute;

@@ -1,5 +1,6 @@
 $(function() {
 	var _content = null;
+	var _btapp = null;
 
 	BtappContentAttributeView = Backbone.View.extend({
 		tagName: 'li',
@@ -101,6 +102,7 @@ $(function() {
 			return this;
 		}
 	});
+
 	BtappContentFunctionsView = Backbone.View.extend({
 		initialize: function() {
 			this.template = _.template($('#functions_template').html());
@@ -203,6 +205,7 @@ $(function() {
 			return this;
 		}
 	});
+
 	BtappContentView = Backbone.View.extend({
 		tagName: "div",
 		className: "content",
@@ -350,6 +353,7 @@ $(function() {
 			delete this._views[model.path];
 		}
 	});
+
 	BtappModelSidebarView = BtappSidebarView.extend({
 		tagName: "div",
 		initialize: function() {
@@ -379,12 +383,42 @@ $(function() {
 		}
 	});
 
-	btapp = new Btapp;
-	btapp.connect({
-		product: window.location.hostname.indexOf('soshareit') === -1 ? 'Torque' : 'SoShare'
-	});
+	var initialize = function(product) {
+		if (_btapp)
+		{
+			_btapp.disconnect();
+			_btapp = null;
+		}
 
-	var btappview = new BtappModelSidebarView({'model':btapp});
-	btappview.expanded = true;
-	$('#data').append(btappview.render().el);
+		_btapp = new Btapp;
+
+		switch (product)
+		{
+			case "Torque":
+			case "SoShare":
+				_btapp.connect({
+					product: product
+				});
+				break;
+			case "BitTorrent":
+			case "uTorrent":
+				_btapp.connect({
+					product: product,
+					plugin: false,
+					pairing_type: 'native'
+				});
+				break;
+		}
+
+		var btappview = new BtappModelSidebarView({'model':_btapp});
+		btappview.expanded = true;
+		$('#data').empty();
+		$('#data').append(btappview.render().el);
+	};
+
+	initialize($('#modeselector').val());
+
+	$('#modeselector').change(function(obj) {
+		initialize(obj.target.value);
+	});
 });
